@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="oracle-data-access" default="build">
+    <description>Build file for the oracle-data-access using Git</description>
+
+    <!--=============================================================================
+      Copyright : Ched Services P/L
+
+        Project : GIS OMS
+
+    Applic Name : exportpoints
+
+         Author : Russell
+
+           Date : 2015-10-20
+
+           Top level build file calls target build
+
+
+git_status      - all files checked in
+documentation   - convert *.md to *.html
+history         - extract history from repo
+package         - create the zip or self extracting exe.
+distribute      - copy the zip or self extracting exe to Chocolately for publishing ..\ched-<name>\
+
+
+    ============================================================================== -->
+<script language="C#" prefix="FileUtil">
+    <references>
+            <include name="System.dll" />
+    </references>
+    <code>
+        <![CDATA[
+        //Find the filename in the current working directory (cwd) and upwards
+        [Function("FindFileUp")]
+            public static String FindFileUp(string cwd, string fileName)
+        {
+            string startPath = Path.Combine(Path.GetFullPath(cwd), fileName);
+            FileInfo file = new FileInfo(startPath);
+            while (!file.Exists) {
+                if (file.Directory.Parent == null) {
+                    return null;
+                }
+                DirectoryInfo parentDir = file.Directory.Parent;
+                file = new FileInfo(Path.Combine(parentDir.FullName, file.Name));
+            }
+            return file.FullName;
+        }
+
+]]>
+    </code>
+</script>
+
+    <property name="proj.build.name" value="${path::get-file-name-without-extension(project::get-buildfile-path() )}" />
+    <!-- Get the current working directory of the build file.  We'll use this to root every thing relative to this -->
+    <property name="proj.topdir" value="${path::get-directory-name(project::get-buildfile-path())}" />
+    <!-- Find properties.xml upwards -->
+    <property name="GisOms.properties.filename" value="${FileUtil::FindFileUp(proj.topdir,'GisOms.choco.properties.xml' )}" />
+    <echo message="SUCCESS GisOms.properties.filename = ${GisOms.properties.filename}" />
+    <include buildfile="${GisOms.properties.filename}"                if="${file::exists(GisOms.properties.filename)}"              unless="${property::exists('props.included')}"   />
+    <property name="configuration" value="Release"  unless="${property::exists('configuration')}" />
+
+    <echo message="Current working directory : ${proj.topdir} for ${proj.build.name}" />
+    <property name="local.ProdName" value="${proj.build.name}"  readonly="true"  />
+
+    <!-- Chocolately location for -->
+    <property name="choco.dir"        value="..\..\src\ched-oracle-data-access\tools"/>
+
+    <!-- Output and input file names -->
+    <property name="proj.build.namePathPart" value="${path::combine(core.build_temp_dir,proj.build.name)}"/>
+    <property name="package.zipFname" value="${proj.build.namePathPart}.zip" />
+    <property name="package.rarFname" value="${proj.build.namePathPart}.rar" />
+    <property name="package.exeFname" value="${path::change-extension(package.rarFname,'.exe')}" />
+
+
+    <target name="build" depends="git_status,clean,git_history,document,package,distribute" description="Does the full build and copies the deliverable to Chocolately">
+        <echo message="Building ${proj.build.name}" />
+    </target>
+
+    <target name="document" description="Generate html from Markdown" >
+        <exec program="powershell.exe" verbose="true" >
+              <arg value='-noProfile' />
+              <arg value='-command' />
+              <arg value='"&amp;{import-module -verbose md2html; convertto-mdhtml -verbose oracle-data-access/*.md}"' />
+        </exec>
+    </target>
+
+    <target name="compile" description="Build Export Points Visual Studio Project" >
+        <nant target="build" verbose="true" inheritall="true">
+            <buildfiles >
+                <include name="**/ExportOMSPoints.compile.build"  />
+                <exclude name="${project::get-buildfile-path()}" />  <!-- avoid recursive execution of current build file -->
+            </buildfiles>
+        </nant>
+    </target>
+
+    <target name="clean" description="">
+        <delete verbose="true">
+            <fileset>
+               <include name="*.log"           />
+            </fileset>
+        </delete>
+    </target>
+
+
+    <target name="package" description="Create a self installing exe in core.build_temp_dir from files " >
+        <delete file="${package.exeFname}" if="${ file::exists(package.exeFname)}" />
+        <delete file="${package.zipFname}" if="${ file::exists(package.zipFname)}" />
+
+        <!-- Create a zip only file -->
+        <exec program="${tools.7zip}" workingdir="${proj.topdir}" verbose="true" resultproperty="zip.result" failonerror="true">
+          <arg line=' a -tzip "${package.zipFname}"  -ir0@"${proj.build.name}.lis"'  />
+        </exec>
+
+        <if test="${ file::exists('README.txt')}" >
+            <property name="local.pkg_readme" value="README.txt" />
+        </if>
+        <if test="${ file::exists('README.md')}" >
+            <property name="local.pkg_readme" value="README.md" />
+        </if>
+        <!-- Create a self extracting winrar file with simple install in !Readme.txt -->
+        <exec program="${tools.rar}"  workingdir="${proj.topdir}" verbose="true" resultproperty="rar.result" failonerror="true">
+            <arg line=' a -r -k -idpc "${package.rarFname}" -sfxDefault.SFX -n"@${proj.build.name}.lis" -z"${local.pkg_readme}" '/>
+        </exec>
+    </target>
+
+
+    <target name="distribute" description="Move the package to the choco release area">
+        <move file="${package.exeFname}" todir="${choco.dir}" verbose="true" />
+        <move file="${package.zipFname}" todir="${choco.dir}" verbose="true" />
+    </target>
+
+
+    <target name="show_deliverable" description="show deliverable for single batch job" >
+        <exec
+            program='explorer.exe'
+            workingdir="${proj.topdir}"
+            failonerror="false"
+            spawn="true"
+            commandline='/e,/root,${core.releases}/select,"${path::combine(core.releases, path::get-file-name(package.zipFname))}"'
+        />
+    </target>
+
+
+
+    <target name="git_history" description="Extract git history" >
+      <property name="local.history" value="${proj.build.name}_history.log" />
+      <property name="local.history.since" value="2015-05-01" />
+      <echo message="
+${proj.build.name}
+========
+" file="${local.history}" />
+      <exec program="${git.exe}" verbose="true"  workingdir="${proj.topdir}"  output="${local.history}" append="true" >
+        <arg line= "log"/>
+        <arg line= '--since="${local.history.since}"'/>
+        <arg line= '--pretty=format:"%h - %an, %ai : %s"' />
+      </exec>
+    </target>
+
+    <target name="git_status" description="Display Git Status">
+        <property name="local.status" value="${proj.build.name}_status.log" />
+        <exec program="${git.exe}" verbose="true"  workingdir="${proj.topdir}" failonerror="true" output="${local.status}" >
+          <arg line= "status --short --untracked=no  --porcelain"/>
+        </exec>
+        <if test="${file::exists(local.status) and file::get-length(local.status) > 2 }">
+            <loadfile file="${local.status}" property="local.status.result" failonerror="true"/>
+            <echo message="${local.status}  ${local.status.result}" />
+            <fail message="Modified source files exist. Please commit changes. ${environment::newline()} ${local.status.result} " />
+        </if>
+    </target>
+
+
+    <target name="git_revision" description="git described based revision number of the code" >
+        <property name="local.git_revision.log"     value="${proj.build.name}.git_revision.log" />
+        <property name="local.git_revision.sql"     value="${proj.build.name}.git_revision.sql" />
+        <delete file="${local.git_revision.sql}" if="${file::exists(local.git_revision.sql)}" />
+        <delete file="${local.git_revision.sql}" if="${file::exists(local.git_revision.sql)}" />
+        <exec program="${git.exe}" verbose="true"  workingdir="${proj.topdir}" failonerror="true" output="${local.git_revision.log}" >
+          <arg line= "describe"/>
+        </exec>
+
+        <loadfile file="${local.git_revision.log}" property="local.git_revision" failonerror="true"/>
+        <echo message="${local.git_revision.sql}  ${local.git_revision}" />
+        <echo message="define REVISION_ID=${local.git_revision}" file="${local.git_revision.sql}" verbose="true"/>
+        <echo message="define RELEASE_ID=${proj.build.name}.${AppBuildNumber.version}" file="${local.git_revision.sql}" append="true" verbose="true"/>
+    </target>
+
+
+
+
+    <target name="show_props" description="print out props" >
+        <script language="C#"  prefix="rgh" >
+            <code>
+                <![CDATA[
+                public static void ScriptMain(Project project) {
+                    project.Log(Level.Info, "Properties:");
+
+                    foreach (DictionaryEntry entry in new SortedList(project.Properties)) {
+                    if (!entry.Key.ToString().StartsWith("nant."))
+                            project.Log(Level.Info, "{0}={1}", entry.Key, entry.Value);
+                    }
+                }
+            ]]></code>
+        </script>
+    </target>
+
+
+    <target name="help" description="Help descriptions">
+        <echo message="Compiles ${proj.build.name} to a package with versioning"  />
+    </target>
+
+    <target name="fail">
+        <echo message="Notifying you of a failure in the build process."/>
+    </target>
+
+</project>
+
