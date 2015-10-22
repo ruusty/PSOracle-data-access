@@ -162,6 +162,7 @@ ${proj.build.name}
 
     <target name="git_status" description="Display Git Status">
         <property name="local.status" value="${proj.build.name}_status.log" />
+        <delete file="${local.status}" if="${file::exists(local.status)}" />
         <exec program="${git.exe}" verbose="true"  workingdir="${proj.topdir}" failonerror="true" output="${local.status}" >
           <arg line= "status --short --untracked=no  --porcelain"/>
         </exec>
@@ -177,7 +178,7 @@ ${proj.build.name}
         <property name="local.git_revision.log"     value="${proj.build.name}.git_revision.log" />
         <property name="local.git_revision.sql"     value="${proj.build.name}.git_revision.sql" />
         <delete file="${local.git_revision.sql}" if="${file::exists(local.git_revision.sql)}" />
-        <delete file="${local.git_revision.sql}" if="${file::exists(local.git_revision.sql)}" />
+        <delete file="${local.git_revision.log}" if="${file::exists(local.git_revision.log)}" />
         <exec program="${git.exe}" verbose="true"  workingdir="${proj.topdir}" failonerror="true" output="${local.git_revision.log}" >
           <arg line= "describe"/>
         </exec>
