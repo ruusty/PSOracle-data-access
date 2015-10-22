@@ -62,8 +62,11 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
     <echo message="Current working directory : ${proj.topdir} for ${proj.build.name}" />
     <property name="local.ProdName" value="${proj.build.name}"  readonly="true"  />
 
-    <!-- Chocolately location for -->
-    <property name="choco.dir"        value="..\..\src\ched-oracle-data-access\tools"/>
+    <!-- Project config settings {-->        <!-- INSTRUCTION: Change these variable  -->
+    <property name="choco.dir"               value="..\..\src\oracle-data-access\tools"/>               <!-- Chocolatey location -->
+    <property name="proj.packageDir"         value=""   />                          <!-- Packaging location under ${proj.topdir} -->
+    <property name="proj.solutionBuild"      value="Example.compile.build" />                  <!-- Visual Studio Solution file -->
+    <!-- Project config settings }-->
 
     <!-- Output and input file names -->
     <property name="proj.build.namePathPart" value="${path::combine(core.build_temp_dir,proj.build.name)}"/>
@@ -87,7 +90,7 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
     <target name="compile" description="Build Export Points Visual Studio Project" >
         <nant target="build" verbose="true" inheritall="true">
             <buildfiles >
-                <include name="**/ExportOMSPoints.compile.build"  />
+                <include name="**/${proj.solutionBuild}"  />
                 <exclude name="${project::get-buildfile-path()}" />  <!-- avoid recursive execution of current build file -->
             </buildfiles>
         </nant>
@@ -103,6 +106,7 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
 
 
     <target name="package" description="Create a self installing exe in core.build_temp_dir from files " >
+        <!--<mkdir dir="${proj.packageDir}"      failonerror="false" unless="${directory::exists(proj.packageDir)}"    />-->
         <delete file="${package.exeFname}" if="${ file::exists(package.exeFname)}" />
         <delete file="${package.zipFname}" if="${ file::exists(package.zipFname)}" />
 
@@ -136,7 +140,7 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
             workingdir="${proj.topdir}"
             failonerror="false"
             spawn="true"
-            commandline='/e,/root,${core.releases}/select,"${path::combine(core.releases, path::get-file-name(package.zipFname))}"'
+            commandline='/e,/root,${choco.dir}/select,"${path::combine(choco.dir, path::get-file-name(package.zipFname))}"'
         />
     </target>
 
