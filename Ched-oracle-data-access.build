@@ -63,7 +63,7 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
     <property name="local.ProdName" value="${proj.build.name}"  readonly="true"  />
 
     <!-- Project config settings {-->        <!-- INSTRUCTION: Change these variable  -->
-    <property name="choco.dir"               value="..\..\src\oracle-data-access\tools"/>                <!-- Chocolatey location -->
+    <property name="choco.dir"               value="..\..\src\ched-oracle-data-access\tools"/>           <!-- Chocolatey location -->
     <property name="proj.packageDir"         value="Oracle.DataAccess"   />                              <!-- Packaging location under ${proj.topdir} -->
     <property name="proj.package.zip.dir"    value="${path::combine(proj.topdir,proj.packageDir)}"   />  <!-- Packaging location under ${proj.topdir} -->
     <property name="proj.solutionBuild"      value="Example.compile.build" />                            <!-- Visual Studio Solution file -->
