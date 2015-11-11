@@ -54,7 +54,7 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
     <!-- Get the current working directory of the build file.  We'll use this to root every thing relative to this -->
     <property name="proj.topdir" value="${path::get-directory-name(project::get-buildfile-path())}" />
     <!-- Find properties.xml upwards -->
-    <property name="GisOms.properties.filename" value="${FileUtil::FindFileUp(proj.topdir,'GisOms.Chocolately.properties.xml' )}" />
+    <property name="GisOms.properties.filename" value="${FileUtil::FindFileUp(proj.topdir,'GisOms.properties.xml' )}" />
     <echo message="SUCCESS GisOms.properties.filename = ${GisOms.properties.filename}" />
     <include buildfile="${GisOms.properties.filename}"                if="${file::exists(GisOms.properties.filename)}"              unless="${property::exists('props.included')}"   />
     <property name="configuration" value="Release"  unless="${property::exists('configuration')}" />
