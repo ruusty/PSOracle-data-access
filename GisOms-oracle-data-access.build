@@ -20,7 +20,7 @@ git_status      - all files checked in
 documentation   - convert *.md to *.html
 history         - extract history from repo
 package         - create the zip or self extracting exe.
-distribute      - copy the zip or self extracting exe to Chocolately for publishing ..\ched-<name>\
+distribute      - copy the zip or self extracting exe to Chocolatey for publishing ..\ched-<name>\
 
 
     ============================================================================== -->
@@ -75,7 +75,7 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
     <property name="package.exeFname" value="${path::change-extension(package.rarFname,'.exe')}" />
 
 
-    <target name="build" depends="git_status,clean,git_history,document,package,distribute" description="Does the full build and copies the deliverable to Chocolately">
+    <target name="build" depends="git_status,clean,git_history,document,package,distribute" description="Does the full build and copies the deliverable to Chocolatey">
         <echo message="Building ${proj.build.name}" />
     </target>
 
@@ -120,10 +120,10 @@ distribute      - copy the zip or self extracting exe to Chocolately for publish
         <if test="${ file::exists('README.md')}" >
             <property name="local.pkg_readme" value="${path::combine(proj.topdir,'README.md')}" />
         </if>
-        <!-- Create a self extracting winrar file with simple install in !Readme.txt -->
+        <!-- Create a self extracting winrar file with simple install in !Readme.txt
         <exec program="${tools.rar}"  workingdir="${proj.package.zip.dir}" verbose="true" resultproperty="rar.result" failonerror="true">
             <arg line=' a -r -k -idpc "${package.rarFname}" -sfxDefault.SFX -n"@${local.lis.path}" -z"${local.pkg_readme}" '/>
-        </exec>
+        </exec>-->
     </target>
 
 
