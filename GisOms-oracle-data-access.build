@@ -120,15 +120,10 @@ distribute      - copy the zip or self extracting exe to Chocolatey for publishi
         <if test="${ file::exists('README.md')}" >
             <property name="local.pkg_readme" value="${path::combine(proj.topdir,'README.md')}" />
         </if>
-        <!-- Create a self extracting winrar file with simple install in !Readme.txt
-        <exec program="${tools.rar}"  workingdir="${proj.package.zip.dir}" verbose="true" resultproperty="rar.result" failonerror="true">
-            <arg line=' a -r -k -idpc "${package.rarFname}" -sfxDefault.SFX -n"@${local.lis.path}" -z"${local.pkg_readme}" '/>
-        </exec>-->
     </target>
 
 
     <target name="distribute" description="Move the package to the choco release area">
-        <move file="${package.exeFname}" todir="${choco.dir}" verbose="true" />
         <move file="${package.zipFname}" todir="${choco.dir}" verbose="true" />
     </target>
 
