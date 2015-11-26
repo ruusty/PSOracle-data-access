@@ -83,7 +83,7 @@ distribute      - copy the zip or self extracting exe to Chocolatey for publishi
         <exec program="powershell.exe" verbose="true" >
               <arg value='-noProfile' />
               <arg value='-command' />
-              <arg value='"&amp;{import-module -verbose md2html; convertto-mdhtml -verbose oracle-data-access/*.md}"' />
+              <arg value='"&amp;{import-module -verbose md2html; convertto-mdhtml -verbose -recurse -mdfile *.md}"' />
         </exec>
     </target>
 
