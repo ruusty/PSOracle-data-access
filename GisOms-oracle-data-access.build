@@ -125,6 +125,7 @@ distribute      - copy the zip or self extracting exe to Chocolatey for publishi
 
     <target name="distribute" description="Move the package to the choco release area">
         <move file="${package.zipFname}" todir="${choco.dir}" verbose="true" />
+        <nant target="build" buildfile="${choco.dir}/ched-oracle-data-access-Choco.build" />
     </target>
 
 
