@@ -89,12 +89,12 @@
 -->
 
         <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
-            <fileset basedir="${proj.topdir}">  <!-- INSTRUCTION: Files specification to build directory  -->
-                 <include name="Oracle.DataAccess/**/*" />
+            <fileset basedir="${proj.topdir}/Oracle.DataAccess">  <!-- INSTRUCTION: Files specification to build directory  -->
+                 <include name="**/*" />
             </fileset>
         </copy>
 
-        <copy todir="${proj.Build.Dir}\Oracle.DataAccess" verbose="true">
+        <copy todir="${proj.Build.Dir}" verbose="true">
            <fileset basedir="${proj.topdir}" >
              <include name="Readme.txt" />
              <include name="${proj.history}" />
