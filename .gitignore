@@ -1,2 +1,10 @@
-*.log
+/wrk
 *.html
+*.zip
+*.log
+*.url
+prj/**/*
+.Archive/**/*
+*.Build.Number
+/build
+/dist
