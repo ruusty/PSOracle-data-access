@@ -96,47 +96,44 @@ Param(
     [Parameter(Mandatory=$false)]
     [Oracle.DataAccess.Client.OracleConnection]$conn,
     [Parameter(Mandatory=$true)] [string]$sql,
-    [Parameter(Mandatory=$false)]
-    [Hashtable]$paramValues
+    [Parameter(Mandatory=$false)] $paramValues
 )
     $conn = Get-Connection($conn)
     $cmd = New-Object Oracle.DataAccess.Client.OracleCommand($sql.Replace("`r"," "),$conn)
-    Set-CommandParamsFromArray $cmd $paramValues
+
+    #Add the Parameters
+    $cmd.BindByName = $true
+    $paramValues | foreach {
+      write-debug("`$_:" + $_.Value);
+    }
+    $paramValues | foreach { $cmd.Parameters.Add($_) | out-null }
+  
     $da = New-Object Oracle.DataAccess.Client.OracleDataAdapter($cmd)
     $dt = New-Object System.Data.DataTable
     [void]$da.Fill($dt)
     ,$dt
 }
 
-function Set-CommandParamsFromArray {
-[CmdletBinding()]
-Param(
-$cmd,
-$paramValues
-    )
-    write-verbose( "Set-CommandParamsFromArray")
-    if (!$paramValues) { return }
-    $cmd.BindByName = $true
-    foreach ($p in $paramValues.GetEnumerator()) {
-        write-verbose $($p.Key + "=>"+ $p.Value) ;
-        $op = New-Object Oracle.DataAccess.Client.OracleParameter
-        $op.ParameterName = $p.Key;
-        $op.Value = $p.Value
-        $cmd.Parameters.Add($op) | Out-Null
-    }
-}
 
 function Invoke {
 [CmdletBinding(SupportsShouldProcess = $true)]
 Param(
     [Parameter(Mandatory=$false)][Oracle.DataAccess.Client.OracleConnection]$conn,
     [Parameter(Mandatory=$true)][string]$sql,
-    [Parameter(Mandatory=$false)][Hashtable]$paramValues,
+    [Parameter(Mandatory=$false)]$paramValues,
     [Parameter(Mandatory=$false)][switch]$passThru
 )
     $conn = Get-Connection($conn)
     $cmd = New-Object Oracle.DataAccess.Client.OracleCommand($sql.Replace("`r"," "),$conn)
-    Set-CommandParamsFromArray -cmd $cmd -paramValues $paramValues
+  
+    #Add the Parameters
+    $cmd.BindByName = $true
+    $paramValues | foreach {
+      write-debug("`$_:" + $_.Value);
+    }
+    $paramValues | foreach { $cmd.Parameters.Add($_) | out-null }
+  
+  
     $trans = $conn.BeginTransaction()
     $result = $cmd.ExecuteNonQuery();
     $cmd.Dispose()

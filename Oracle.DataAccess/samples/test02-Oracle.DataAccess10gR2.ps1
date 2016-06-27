@@ -11,9 +11,9 @@ $DataSource="POND.WORLD"
 $connStr = "User Id=/`;Data Source={0}" -f $DataSource
 
 $Oraconn = OmsConnect -PassThru  -ConnectionString $connStr
-#TODO Get paramValues working
+#Set paramValues 
 $paramValues = @(
-   (New-OmsOraCmdParam -name "HV_Feeder"                 -type ([Oracle.DataAccess.Client.OracleDbType]::Varchar2)  -direction ([System.Data.ParameterDirection]::Input)  -size 20 -value "RD014")
+   (New-OmsOraCmdParam -name "HV_FEEDER"  -type ([Oracle.DataAccess.Client.OracleDbType]::Varchar2)  -direction ([System.Data.ParameterDirection]::Input)  -size 20 -value "RD014")
    )
 
 ## Display the OMS Network Hierarchy from the HV Feeder Circuit Breaker. i.e. devices under the Feeder CB
@@ -23,7 +23,7 @@ select  hd.*,ft.name
 from
 oms_hana.hana_network hd
 join OMS_HANA.FACILITY_TYPE FT on HD.FACILITY_TYPE_ID = FT.ID
-where HD.BREAK_ID > 5 and HD.FEEDER = 'RD014'
+where HD.BREAK_ID > 5 and HD.FEEDER = :HV_FEEDER
 )
 SELECT    break_id,
           gis_id,
@@ -39,7 +39,7 @@ SELECT    break_id,
 from
 lower_network d
  left join  oms_hana.HANA_LINKS l on D.BREAK_ID = L.child
-   START WITH parent = (select break_id from oms_hana.hana_network where tree_level=6 and feeder = 'RD014')
+   START WITH parent = (select break_id from oms_hana.hana_network where tree_level=6 and feeder = :HV_FEEDER)
    CONNECT BY PRIOR break_id = parent
    order siblings by d.location_description
 '@
