@@ -91,6 +91,7 @@
         <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
             <fileset basedir="${proj.topdir}/Oracle.DataAccess">  <!-- INSTRUCTION: Files specification to build directory  -->
                  <include name="**/*" />
+                 <exclude name="*.TempPoint.psd1" />
             </fileset>
         </copy>
 
