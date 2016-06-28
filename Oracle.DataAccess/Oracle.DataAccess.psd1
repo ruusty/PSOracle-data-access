@@ -15,7 +15,7 @@
 @{
 
 	# Script module or binary module file associated with this manifest
-	ModuleToProcess = 'Oracle.DataAccess.psd1'
+	ModuleToProcess = 'Oracle.DataAccess.psm1'
 
 	# Version number of this module.
 	ModuleVersion = '1.1.0.0'

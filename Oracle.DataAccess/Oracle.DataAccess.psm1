@@ -14,7 +14,7 @@ param (
     $asm = [System.Reflection.Assembly]::Load($name)
     if ($passThru) { $asm }
 }
-
+filter Skip-Empty { $_ | ?{ $_ -ne $null -and $_ } }
 <#
 .SYNOPSIS
 Connects to oracle via a connection string.
@@ -96,17 +96,18 @@ Param(
     [Parameter(Mandatory=$false)]
     [Oracle.DataAccess.Client.OracleConnection]$conn,
     [Parameter(Mandatory=$true)] [string]$sql,
-    [Parameter(Mandatory=$false)] $paramValues
+    [Parameter(Mandatory=$false)] $paramValues = $null
 )
     $conn = Get-Connection($conn)
     $cmd = New-Object Oracle.DataAccess.Client.OracleCommand($sql.Replace("`r"," "),$conn)
 
     #Add the Parameters
     $cmd.BindByName = $true
-    $paramValues | foreach {
-      write-debug("`$_:" + $_.Value);
+    $paramValues | Skip-Empty | foreach {
+      write-verbose("Parameter:" + $_.ParameterName);
+      $_ | Format-List | Out-String | write-verbose
     }
-    $paramValues | foreach { $cmd.Parameters.Add($_) | out-null }
+    $paramValues | Skip-Empty | foreach { $cmd.Parameters.Add($_) | out-null }
   
     $da = New-Object Oracle.DataAccess.Client.OracleDataAdapter($cmd)
     $dt = New-Object System.Data.DataTable
@@ -120,7 +121,7 @@ function Invoke {
 Param(
     [Parameter(Mandatory=$false)][Oracle.DataAccess.Client.OracleConnection]$conn,
     [Parameter(Mandatory=$true)][string]$sql,
-    [Parameter(Mandatory=$false)]$paramValues,
+    [Parameter(Mandatory=$false)]$paramValues = $null,
     [Parameter(Mandatory=$false)][switch]$passThru
 )
     $conn = Get-Connection($conn)
@@ -128,13 +129,14 @@ Param(
   
     #Add the Parameters
     $cmd.BindByName = $true
-    $paramValues | foreach {
-      write-debug("`$_:" + $_.Value);
+    $paramValues | Skip-Empty | foreach {
+      write-verbose("Parameter:" + $_.ParameterName);
+      $_ | Format-List | Out-String | write-verbose
     }
-    $paramValues | foreach { $cmd.Parameters.Add($_) | out-null }
+    $paramValues | Skip-Empty | foreach { $cmd.Parameters.Add($_) | out-null }
   
   
-    $trans = $conn.BeginTransaction()
+  $trans = $conn.BeginTransaction()
     $result = $cmd.ExecuteNonQuery();
     $cmd.Dispose()
 
@@ -197,7 +199,7 @@ function Invoke_WITH_DBMS_OUTPUT {
 Param(
     [Parameter(Mandatory=$false)][Oracle.DataAccess.Client.OracleConnection]$conn,
     [Parameter(Mandatory=$true)][string]$sql,
-    [Parameter(Mandatory=$false)]$paramValues,
+    [Parameter(Mandatory=$false)]$paramValues = $null,
     [Parameter(Mandatory=$false)][switch]$passThru
 )
     write-debug( "Invoke_WITH_DBMS_OUTPUT")
@@ -207,16 +209,17 @@ Param(
     $conn = Get-Connection($conn)
     # Default is CommandType.Text
     $cmd  = New-Object Oracle.DataAccess.Client.OracleCommand($sql.Replace("`r"," "), $conn)
-    Write-debug ("OracleCommand.CommandText" + $sql)
-
+    write-verbose ("OracleCommand.CommandText" + $sql)
+  
     #Add the Parameters
     $cmd.BindByName = $true
-    $paramValues | foreach {
-        write-debug("`$_:"+ $_.Value);
+    $paramValues | Skip-Empty | foreach {
+      write-verbose("Parameter:" + $_.ParameterName);
+      $_ | Format-List | Out-String | write-verbose
     }
-    $paramValues | foreach {$cmd.Parameters.Add($_)| out-null}
-
-    $trans = $conn.BeginTransaction()
+    $paramValues | Skip-Empty | foreach { $cmd.Parameters.Add($_) | out-null }
+  
+  $trans = $conn.BeginTransaction()
     try{
       $result = $cmd.ExecuteNonQuery();
     }
@@ -225,8 +228,8 @@ Param(
          write-verbose($_.Exception.Datasource + " " + $_.Exception.Message)
          if (($_.Exception.Number -lt 20010) -or ($_.Exception.Number -gt 20999)) {write-verbose($cmd.CommandText);}
    }
-
-    Write-debug ("cmd.ExecuteNonQuery:" + $result)
+  
+    write-verbose ("cmd.ExecuteNonQuery:" + $result)
 
     $num_to_fetch = 8;
     $numLinesFetched = 0;
