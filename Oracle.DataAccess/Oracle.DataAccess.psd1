@@ -18,7 +18,7 @@
 	ModuleToProcess = 'Oracle.DataAccess.psm1'
 
 	# Version number of this module.
-	ModuleVersion = '1.1.0.0'
+	ModuleVersion = '1.0.0.0'
 
 	# ID used to uniquely identify this module
 	GUID = 'f20e989b-668f-4770-8a02-48183e65e07f'
