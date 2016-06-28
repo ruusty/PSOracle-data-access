@@ -53,7 +53,7 @@
 
     <!-- Project config settings {-->        <!-- INSTRUCTION: Change these variable  -->
     <property name="proj.choco.dir"          value="${path::combine(proj.topdir,'..\..\src\ched-' + project::get-name())}"/>                      <!-- Chocolatey location -->
-    <property name="proj.choco.nant.build"   value="${path::combine(proj.choco.dir,'ched-' + project::get-name() + '-Choco.build')}"/>                      <!-- Chocolatey location -->
+    <property name="proj.choco.nant.build"   value="${path::combine(proj.choco.dir,'ched-' + project::get-name() + '-Choco.build')}"/>            <!-- Chocolatey build location -->
     <property name="proj.Dist.Dir"           value="Dist"   />                                                            <!-- Dist location under ${proj.topdir} -->
     <property name="proj.dist.path"          value="${path::combine(proj.topdir,proj.Dist.Dir)}"   />                     <!-- Dist location absolute path under ${proj.topdir} -->
     <property name="proj.Build.Dir"          value="Build"   />                                                           <!-- Build location under ${proj.topdir} -->
@@ -79,6 +79,7 @@
     </target>
 
     <target name="compile" description="Build Deliverable" >
+        <call target="version" />
 <!--   <exec   program="cmd.exe" verbose="true" workingdir="${proj.topdir}\src" failonerror="true">
             <arg line="/C" />
             <arg line="psake.cmd" />
@@ -91,8 +92,21 @@
         <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
             <fileset basedir="${proj.topdir}/Oracle.DataAccess">  <!-- INSTRUCTION: Files specification to build directory  -->
                  <include name="**/*" />
-                 <exclude name="*.TempPoint.psd1" />
+                 <exclude name="**/*.psd1"/>
+                 <exclude name="**/*.TempPoint.psd1" />
+                 <exclude name="**/*.TempPoint.psm1" />
+                 <exclude name="**/*.TempPoint.ps1" />
             </fileset>
+        </copy>
+
+        <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
+            <fileset basedir="${proj.topdir}/Oracle.DataAccess"><!-- INSTRUCTION: Files specification to build directory  -->
+                <include name="**/*.psd1"/>
+                <exclude name="**/*.TempPoint.psd1" />
+            </fileset>
+            <filterchain>
+                <replacestring from="1.0.0.0" to="${AppBuildNumber.version}"/>
+            </filterchain>
         </copy>
 
         <copy todir="${proj.Build.Dir}" verbose="true">
@@ -105,7 +119,6 @@
         <exec program="${tools.7zip}" workingdir="${proj.Build.Dir}" verbose="true" resultproperty="zip.result" failonerror="true">
           <arg line=' a -tzip "${package.zipFname}"  -ir0@"${package.ListFname}"'  />
         </exec>
-
     </target>
 
     <target name="clean" description="Remove all generated files">
@@ -128,11 +141,14 @@
 -->
     </target>
 
-
-    <target name="distribute" description="Move SDLC deliverables to the GisOms Delivery Server">
+    <target name="version" description="Set the version">
         <echo message="${GisOms.release.MajorMinor}" file="${proj.version.file}" append="false" />
         <version buildtype="MonthDay" path="${proj.version.file}" prefix="AppBuildNumber" revisiontype="Automatic" startdate="${GisOms.release.StartDate}" verbose="true"/>
-        <property name="local.PackageVersion" value="${AppBuildNumber.major}.${AppBuildNumber.minor}.${AppBuildNumber.build}.${AppBuildNumber.revision}"/>
+    </target>
+
+    <target name="distribute" description="Copy SDLC deliverables to the GisOms Delivery Server">
+        <loadfile file="${proj.version.file}"     property="AppBuildNumber.version" />
+        <property name="local.PackageVersion"     value="${AppBuildNumber.version}"/>
         <property name="proj.DeliveryDir" value="${path::combine(core.delivery.gisoms.dir,path::combine(project::get-name(),local.PackageVersion))}" />
 
         <echo message="proj.DeliveryDir=${proj.DeliveryDir}" />
@@ -142,7 +158,7 @@
             </fileset>
         </copy>
         <copy todir="${proj.DeliveryDir}" verbose="true">
-            <fileset basedir="${proj.topdir}\" >
+            <fileset basedir="${proj.topdir}/" >
               <include name="${proj.history}" />
             </fileset>
         </copy>
@@ -153,6 +169,20 @@
         <copy file="${proj.version.file}" todir="${proj.choco.dir}"/>
         <nant target="build" buildfile="${proj.choco.nant.build}" />
     </target>
+
+    <target name="show_deliverable" description="show deliverable for single batch job" >
+        <loadfile file="${proj.version.file}"     property="AppBuildNumber.version" />
+        <property name="local.PackageVersion"     value="${AppBuildNumber.version}"/>
+        <property name="proj.DeliveryDir" value="${path::combine(core.delivery.gisoms.dir,path::combine(proj.build.name,local.PackageVersion))}" />
+        <exec verbose="true"
+            program='explorer.exe'
+            workingdir="${proj.topdir}"
+            failonerror="false"
+            spawn="true"
+            commandline='/e,/root,${proj.DeliveryDir}'
+        />
+    </target>
+
 
 
     <target name="git_history" description="Extract git history" >
@@ -217,6 +247,10 @@ ${proj.build.name}
 
     <target name="help" description="Help descriptions">
         <echo message="Compiles ${proj.build.name} to a package with versioning"  />
+        <echo message="nant -buildfile:${project::get-buildfile-path()} -projecthelp"/>
+        <exec program="nant">
+            <arg line="-buildfile:${project::get-buildfile-path()} -projecthelp"/>
+        </exec>
     </target>
 
     <target name="fail">
