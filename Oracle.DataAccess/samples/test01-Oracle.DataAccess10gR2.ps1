@@ -4,7 +4,7 @@
 #Windows 2012R2
 $cfg_ora_version='1.102.5.0'
 
-Import-Module Oracle.DataAccess -Prefix Oms -ArgumentList $cfg_ora_version
+Import-Module "..\..\Oracle.DataAccess" -Prefix Oms -ArgumentList $cfg_ora_version
 $DataSource="POND.WORLD"
 
 #Using the oracle Wallet

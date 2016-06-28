@@ -4,14 +4,14 @@
 #Windows 2012R2
 $cfg_ora_version='1.102.5.0'
 
-Import-Module Oracle.DataAccess -Prefix Oms -ArgumentList $cfg_ora_version
+Import-Module "..\..\Oracle.DataAccess" -Prefix Oms -ArgumentList $cfg_ora_version
 $DataSource="POND.WORLD"
 
 #Using the oracle Wallet
 $connStr = "User Id=/`;Data Source={0}" -f $DataSource
 
 $Oraconn = OmsConnect -PassThru  -ConnectionString $connStr
-#Set paramValues 
+#Set paramValues
 $paramValues = @(
    (New-OmsOraCmdParam -name "HV_FEEDER"  -type ([Oracle.DataAccess.Client.OracleDbType]::Varchar2)  -direction ([System.Data.ParameterDirection]::Input)  -size 20 -value "RD014")
    )

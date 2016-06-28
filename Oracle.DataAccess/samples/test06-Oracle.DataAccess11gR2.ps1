@@ -4,16 +4,17 @@
 #Windows 2012R2
 $cfg_ora_version='1.102.5.0'
 #Oracle 11.2.4.0
-$cfg_ora_version='2.112.4.0'
+$cfg_ora_version = '2.112.4.0'
 
-Import-Module "Oracle.DataAccess" -Prefix Oms -ArgumentList $cfg_ora_version
+
+Import-Module "..\..\Oracle.DataAccess" -Prefix Oms -ArgumentList $cfg_ora_version -verbose
 $DataSource="POND.WORLD"
 
 #Using the oracle Wallet
 $connStr = "User Id=/`;Data Source={0}" -f $DataSource
 
 $Oraconn = OmsConnect -PassThru  -ConnectionString $connStr
-#ParamValues 
+#ParamValues
 $paramValues = @(
    (New-OmsOraCmdParam -name "HV_FEEDER"   -type ([Oracle.DataAccess.Client.OracleDbType]::Varchar2)  -direction ([System.Data.ParameterDirection]::Input)  -size 20 -value "RD014")
    )
@@ -47,7 +48,7 @@ lower_network d
 '@
 
 
-$dt2 = Get-OmsDataTable -conn $Oraconn  -sql $sqlQuery -paramValues $paramValues
+$dt2 = Get-OmsDataTable -conn $Oraconn  -sql $sqlQuery -paramValues $paramValues -verbose
 
 write-host($dt2 | format-table | out-string);
 

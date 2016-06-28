@@ -8,3 +8,6 @@ prj/**/*
 *.Build.Number
 /build
 /dist
+*.TempPoint.psm1
+*.TempPoint.psd1
+*.TempPoint.ps1
