@@ -1,33 +1,62 @@
-# Oracle Data Access #
+# Oracle.DataAccess #
+<pre style="font-size: .75em;"><code>
+Project:        GIS/OMS
+Product:        Oracle.DataAccess
+Version:        1.0.0.0
+Date:           @now@ 
+Description:    Powershell module to connect to Oracle Database
+
+CHED Services
+-------------------------------------------------------------------------------
+</code></pre>
+
+
+<a name="TOC"></a>
+# Table of Contents
+
+- [Description](#Description)
+    - [Load the Module](#load)
+    - [Connect](#connect)
+
+<a name="Description"></a>
+## Description [&uarr;](#TOC) ##
+
+Powershell module to access an  Oracle Database.
 
 Must be initiated in a 32bit process because we only have a 32bit Oracle.DataAccess installed on Servers and PCs
 
 
-## Load the Module ##
+
+<a name="load"></a>
+### Load the Module [&uarr;](#TOC)###
 
 ~~~
 $cfg_ora_version='10.2.0.100'
 Import-Module Oracle.DataAccess -Prefix Oms -ArgumentList $cfg_ora_version
 
 ~~~
+<a name="connect"></a>
+### Connect[&uarr;](#TOC) ###
 
-## Connect ##
-
-### SYNOPSIS ###
+**SYNOPSIS**
 
 Connects to oracle via a connection string.
 
-### DESCRIPTION ###
+**DESCRIPTION**
+
 Creates a new Oracle Connection and opens it using the specified connections string.
 Created connection is stored and not returned unless -PassThru is specified.
 
-### PARAMETER ConnectionString ###
+**PARAMETER ConnectionString**
+
 The full connection string of the connection to be created and opened.
 
-### PARAMETER PassThru ###
+**PARAMETER PassThru**
+
 If -PassThru is supplied, the created connection will be returned and not stored.
 
-### EXAMPLE ###
+**EXAMPLE**
+
 Connect to Oracle with a connection string and store the connection for later use without outputting it.
 
 	Connect "Data Source=LOCALDEV;User Id=HR;Password=Pass"
@@ -36,13 +65,14 @@ Using the Oracle Wallet to store password
 
 	Connect "User Id=/`;Data Source=pond.world"
 
-### NOTES ###
+** NOTES **
+
 If -PassThru isn't used, the connection will be available for later operations such as Disconnect, without having to pass it
 
 
 
 
-### Example Query ###
+**Example Query**
 
 
 ~~~

@@ -67,18 +67,12 @@
    <property name="proj.history" value="${proj.build.name}.history.log"/>
    <property name="proj.version.file" value="${proj.build.name}.Build.Number"/>
    <!-- Project config settings }-->
-   <target name="build" depends="git_status,clean,git_history,document,compile,distribute,build_choco" description="Does the full build and copies the deliverable to \\COVMWNECODP1\Delivery\PSOracle-data-access">
+   <target name="build" depends="git_status,clean,git_history,version,compile,distribute,build_choco" description="Does the full build and copies the deliverable to \\COVMWNECODP1\Delivery\PSOracle-data-access">
       <echo message="Building ${proj.build.name}"/>
    </target>
-   <target name="document" description="Generate html from Markdown">
-      <exec program="powershell.exe" verbose="true">
-         <arg value="-noProfile"/>
-         <arg value="-command"/>
-         <arg value='"&amp;{import-module -verbose md2html; convertto-mdhtml -verbose -recurse }"'/>
-      </exec>
-   </target>
+
    <target name="compile" description="Build Deliverable">
-      <call target="version"/>
+       <loadfile file="${proj.version.file}"       property="AppBuildNumber.version" />
       <!--   <exec   program="cmd.exe" verbose="true" workingdir="${proj.topdir}\src" failonerror="true">
             <arg line="/C" />
             <arg line="psake.cmd" />
@@ -90,8 +84,8 @@
       <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
          <fileset basedir="${proj.topdir}/Oracle.DataAccess">
             <!-- INSTRUCTION: Files specification to build directory  -->
-            <include name="**/*"/>
-            <exclude name="**/*.psd1"/>
+            <include name="*.psm1"/>
+            <include name="samples/*"/>
             <exclude name="**/*.TempPoint.psd1"/>
             <exclude name="**/*.TempPoint.psm1"/>
             <exclude name="**/*.TempPoint.ps1"/>
@@ -100,11 +94,15 @@
       <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
          <fileset basedir="${proj.topdir}/Oracle.DataAccess">
             <!-- INSTRUCTION: Files specification to build directory  -->
-            <include name="**/*.psd1"/>
+            <include name="*.md"/>
+            <include name="*.psd1"/>
             <exclude name="**/*.TempPoint.psd1"/>
          </fileset>
          <filterchain>
             <replacestring from="1.0.0.0" to="${AppBuildNumber.version}"/>
+            <replacetokens>
+               <token key="now" value="${DSTAMP.ISO}"/>
+            </replacetokens>
          </filterchain>
       </copy>
       <copy todir="${proj.Build.Dir}" verbose="true">
@@ -113,11 +111,18 @@
             <include name="${proj.history}"/>
          </fileset>
       </copy>
+
+      <exec program="powershell.exe" verbose="true" workingdir="${proj.Build.Dir}">
+         <arg value="-noProfile"/>
+         <arg value="-command"/>
+         <arg value='"&amp;{import-module -verbose md2html; convertto-mdhtml -verbose -recurse }"'/>
+      </exec>
       <!-- Create a zip only file -->
       <exec program="${tools.7zip}" workingdir="${proj.Build.Dir}" verbose="true" resultproperty="zip.result" failonerror="true">
          <arg line=' a -tzip "${package.zipFname}"  -ir0@"${package.ListFname}"'/>
       </exec>
    </target>
+
    <target name="clean" description="Remove all generated files">
       <delete dir="${proj.Dist.Dir}\" failonerror="false" if="${directory::exists(proj.Dist.Dir)}"/>
       <delete dir="${proj.Build.Dir}\" failonerror="false" if="${directory::exists(proj.Build.Dir)}"/>
@@ -141,6 +146,7 @@
       <echo message="${GisOms.release.MajorMinor}" file="${proj.version.file}" append="false"/>
       <version buildtype="MonthDay" path="${proj.version.file}" prefix="AppBuildNumber" revisiontype="Automatic" startdate="${GisOms.release.StartDate}" verbose="true"/>
    </target>
+
    <target name="distribute" description="Copy SDLC deliverables to the GisOms Delivery Server">
       <loadfile file="${proj.version.file}" property="AppBuildNumber.version"/>
       <property name="local.PackageVersion" value="${AppBuildNumber.version}"/>
@@ -156,7 +162,6 @@
             <include name="${proj.history}"/>
          </fileset>
       </copy>
-      <delete dir="${proj.Dist.Dir}" verbose="true"/>
    </target>
    <target name="build_choco" description="Do the choco build">
       <copy file="${proj.version.file}" todir="${proj.choco.dir}"/>
