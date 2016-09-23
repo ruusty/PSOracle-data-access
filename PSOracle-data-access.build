@@ -73,19 +73,13 @@
 
    <target name="compile" description="Build Deliverable">
        <loadfile file="${proj.version.file}"       property="AppBuildNumber.version" />
-      <!--   <exec   program="cmd.exe" verbose="true" workingdir="${proj.topdir}\src" failonerror="true">
-            <arg line="/C" />
-            <arg line="psake.cmd" />
-            <arg line="default.ps1" />
-            <arg line="-parameters  @{buildConfiguration='Release'}" />
-            <arg line="compile" />
-        </exec>
--->
-      <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
+
+       <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
          <fileset basedir="${proj.topdir}/Oracle.DataAccess">
             <!-- INSTRUCTION: Files specification to build directory  -->
             <include name="*.psm1"/>
-            <include name="samples/*"/>
+            <include name="specification/*.bat"/>
+            <include name="specification/*.ps1"/>
             <exclude name="**/*.TempPoint.psd1"/>
             <exclude name="**/*.TempPoint.psm1"/>
             <exclude name="**/*.TempPoint.ps1"/>
@@ -133,15 +127,8 @@
             <include name="${project::get-name()}.Build.Number"/>
          </fileset>
       </delete>
-      <!--
-        <exec   program="cmd.exe" verbose="true" workingdir="${proj.topdir}\src" failonerror="true">
-            <arg line="/C" />
-            <arg line="psake.cmd" />
-            <arg line="default.ps1" />
-            <arg line="clean" />
-        </exec>
--->
    </target>
+
    <target name="version" description="Set the version">
       <echo message="${GisOms.release.MajorMinor}" file="${proj.version.file}" append="false"/>
       <version buildtype="MonthDay" path="${proj.version.file}" prefix="AppBuildNumber" revisiontype="Automatic" startdate="${GisOms.release.StartDate}" verbose="true"/>
