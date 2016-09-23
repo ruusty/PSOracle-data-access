@@ -7,7 +7,7 @@ $cfg_ora_version='1.102.5.0'
 $cfg_ora_version='2.112.4.0'
 
 Import-Module "..\..\Oracle.DataAccess" -Prefix Oms -ArgumentList $cfg_ora_version -verbose
-$DataSource="POND.WORLD"
+$DataSource="PON43D.WORLD"
 
 #Using the oracle Wallet
 $connStr = "User Id=/`;Data Source={0}" -f $DataSource
