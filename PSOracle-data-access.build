@@ -48,6 +48,14 @@
       <fail message="${GisOms.properties.filename} not found"/>
    </if>
    <include buildfile="${GisOms.properties.path}" unless="${property::exists('props.included')}"/>
+
+   <property name="proj.version.regex"     value="${FileUtil::FindFileUp(proj.topdir,'version.regex.xml')}"/>
+   <if test="${proj.version.regex == ''}" >
+       <fail message="version.regex.xml not found"/>
+   </if>
+   <include buildfile="${proj.version.regex}" />
+
+
    <!-- Project config settings {-->
    <!-- INSTRUCTION: Change these variable  -->
    <property name="proj.choco.dir" value="${path::combine(proj.topdir,'..\..\src\ched-' + project::get-name())}"/>
@@ -80,31 +88,23 @@
             <include name="*.psm1"/>
             <include name="specification/*.bat"/>
             <include name="specification/*.ps1"/>
+            <include name="*.md"/>
+            <include name="*.psd1"/>
             <exclude name="**/*.TempPoint.psd1"/>
             <exclude name="**/*.TempPoint.psm1"/>
             <exclude name="**/*.TempPoint.ps1"/>
          </fileset>
       </copy>
-      <copy todir="${proj.Build.Dir}" flatten="false" verbose="true">
-         <fileset basedir="${proj.topdir}/Oracle.DataAccess">
-            <!-- INSTRUCTION: Files specification to build directory  -->
-            <include name="*.md"/>
-            <include name="*.psd1"/>
-            <exclude name="**/*.TempPoint.psd1"/>
-         </fileset>
-         <filterchain>
-            <replacestring from="1.0.0.0" to="${AppBuildNumber.version}"/>
-            <replacetokens>
-               <token key="now" value="${DSTAMP.ISO}"/>
-            </replacetokens>
-         </filterchain>
-      </copy>
+
       <copy todir="${proj.Build.Dir}" verbose="true">
          <fileset basedir="${proj.topdir}">
-            <include name="Readme.txt"/>
             <include name="${proj.history}"/>
          </fileset>
       </copy>
+
+      <!-- Version the Module Manifest and README.md -->
+      <call target="versionBuild" />
+
 
       <exec program="powershell.exe" verbose="true" workingdir="${proj.Build.Dir}">
          <arg value="-noProfile"/>
@@ -133,6 +133,19 @@
       <echo message="${GisOms.release.MajorMinor}" file="${proj.version.file}" append="false"/>
       <version buildtype="MonthDay" path="${proj.version.file}" prefix="AppBuildNumber" revisiontype="Automatic" startdate="${GisOms.release.StartDate}" verbose="true"/>
    </target>
+
+
+   <target name="versionBuild" description="Version the Module Manifest and README.md ">
+        <loadfile file="${proj.version.file}"     property="AppBuildNumber.version" />
+        <echo message="Build Number ${AppBuildNumber.version}"/>
+
+        <property name="local.ModuleManifest.Path" value="${path::combine (proj.Build.path,'Oracle.DataAccess.psd1') }"/>
+        <echo message="${regex::versionmodule( local.ModuleManifest.Path, AppBuildNumber.version)}" />
+
+        <property name="local.Readme.Path" value="${path::combine (proj.Build.path,'README.md') }"/>
+        <echo message="${regex::versionreadme( local.Readme.Path, AppBuildNumber.version, DSTAMP.ISO )}" />
+    </target>
+
 
    <target name="distribute" description="Copy SDLC deliverables to the GisOms Delivery Server">
       <loadfile file="${proj.version.file}" property="AppBuildNumber.version"/>

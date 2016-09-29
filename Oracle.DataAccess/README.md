@@ -2,8 +2,8 @@
 <pre style="font-size: .75em;"><code>
 Project:        GIS/OMS
 Product:        Oracle.DataAccess
-Version:        1.0.0.0
-Date:           @now@ 
+Version:        4.3
+Date:           2016.00.00
 Description:    Powershell module to connect to Oracle Database
 
 CHED Services
@@ -45,7 +45,7 @@ $OraDataAss = Resolve-Path -path "C:\oracle\product\10.2.*\client_1\ODP.NET\bin\
 ####Oracle 11gR2
 
 ~~~
-Import-Module Oracle.DataAccess -Prefix Oms 
+Import-Module Oracle.DataAccess -Prefix Oms
 ~~~
 
 Locates assembly
