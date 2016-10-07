@@ -10,19 +10,9 @@ param (
     [string] $version,
     [Parameter(Position=1)] [switch] $passThru
 )
-  <#$name = ("Oracle.DataAccess, Version={0}, Culture=neutral, PublicKeyToken=89b483f429c47342" -f $version)#>
-  if ($version -le '1.102.5.0')
-  {
-    $OraDataAss = Resolve-Path -path "C:\oracle\product\10.2.*\client_1\ODP.NET\bin\1.x\Oracle.DataAccess.dll" | select -First 1
-  }
-  else
-  {
-    $OraDataAss = Resolve-Path -path "C:\oracle\11g_32\product\11.2.*\client_1\odp.net\bin\4\Oracle.DataAccess.dll" | select -First 1
-  }
-
-  Write-Host $("Loading assembly: {0}" -f $OraDataAss.Path)
-  $asm = [System.Reflection.Assembly]::LoadFile($OraDataAss.Path);
-  if ($passThru) { $asm }
+    $name = ("Oracle.DataAccess, Version={0}, Culture=neutral, PublicKeyToken=89b483f429c47342" -f $version)
+    $asm = [System.Reflection.Assembly]::Load($name)
+    if ($passThru) { $asm }
 }
 filter Skip-Empty { $_ | ?{ $_ -ne $null -and $_ } }
 <#
@@ -118,7 +108,7 @@ Param(
       $_ | Format-List | Out-String | write-verbose
     }
     $paramValues | Skip-Empty | foreach { $cmd.Parameters.Add($_) | out-null }
-
+  
     $da = New-Object Oracle.DataAccess.Client.OracleDataAdapter($cmd)
     $dt = New-Object System.Data.DataTable
     [void]$da.Fill($dt)
@@ -136,7 +126,7 @@ Param(
 )
     $conn = Get-Connection($conn)
     $cmd = New-Object Oracle.DataAccess.Client.OracleCommand($sql.Replace("`r"," "),$conn)
-
+  
     #Add the Parameters
     $cmd.BindByName = $true
     $paramValues | Skip-Empty | foreach {
@@ -144,8 +134,8 @@ Param(
       $_ | Format-List | Out-String | write-verbose
     }
     $paramValues | Skip-Empty | foreach { $cmd.Parameters.Add($_) | out-null }
-
-
+  
+  
   $trans = $conn.BeginTransaction()
     $result = $cmd.ExecuteNonQuery();
     $cmd.Dispose()
@@ -220,7 +210,7 @@ Param(
     # Default is CommandType.Text
     $cmd  = New-Object Oracle.DataAccess.Client.OracleCommand($sql.Replace("`r"," "), $conn)
     write-verbose ("OracleCommand.CommandText" + $sql)
-
+  
     #Add the Parameters
     $cmd.BindByName = $true
     $paramValues | Skip-Empty | foreach {
@@ -228,7 +218,7 @@ Param(
       $_ | Format-List | Out-String | write-verbose
     }
     $paramValues | Skip-Empty | foreach { $cmd.Parameters.Add($_) | out-null }
-
+  
   $trans = $conn.BeginTransaction()
     try{
       $result = $cmd.ExecuteNonQuery();
@@ -238,7 +228,7 @@ Param(
          write-verbose($_.Exception.Datasource + " " + $_.Exception.Message)
          if (($_.Exception.Number -lt 20010) -or ($_.Exception.Number -gt 20999)) {write-verbose($cmd.CommandText);}
    }
-
+  
     write-verbose ("cmd.ExecuteNonQuery:" + $result)
 
     $num_to_fetch = 8;
