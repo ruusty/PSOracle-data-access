@@ -11,3 +11,5 @@ prj/**/*
 *.TempPoint.psm1
 *.TempPoint.psd1
 *.TempPoint.ps1
+/PSoracle-data-access.git_history.txt
+/*.nupkg

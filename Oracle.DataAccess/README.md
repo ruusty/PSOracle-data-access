@@ -1,5 +1,6 @@
-# Oracle.DataAccess #
-<pre style="font-size: .75em;"><code>
+# Oracle.DataAccess <!-- omit in toc --> #
+
+~~~text
 Project:        GIS/OMS
 Product:        Oracle.DataAccess
 Version:        4.3
@@ -7,54 +8,57 @@ Date:           2016.00.00
 Description:    Powershell module to connect to Oracle Database
 
 CHED Services
--------------------------------------------------------------------------------
-</code></pre>
-
+~~~
 
 <a name="TOC"></a>
-# Table of Contents
 
-- [Description](#Description)
-    - [Load the Module](#load)
-    - [Connect](#connect)
+- [Description &uarr;](#description-uarr)
+  - [Load the Module](#load-the-module)
+    - [Oracle 10gR2](#oracle-10gr2)
+    - [Oracle 11gR2](#oracle-11gr2)
+  - [Connect](#connect)
+  - [Example Query](#example-query)
 
-<a name="Description"></a>
 ## Description [&uarr;](#TOC) ##
 
 Powershell module to access an  Oracle Database.
 
 Must be initiated in a 32bit process because we only have a 32bit Oracle.DataAccess installed on Servers and PCs
 
+[&uarr;](#TOC)
 
+### Load the Module ##
 
-<a name="load"></a>
-### Load the Module [&uarr;](#TOC)###
+#### Oracle 10gR2 ###
 
-####Oracle 10gR2
-~~~
+~~~powershell
 $cfg_ora_version='1.102.5.0'
 Import-Module Oracle.DataAccess -Prefix Oms -ArgumentList $cfg_ora_version
 ~~~
 
-Locates assembly
+- Locates assembly
 
-~~~
+~~~powershell
 $OraDataAss = Resolve-Path -path "C:\oracle\product\10.2.*\client_1\ODP.NET\bin\1.x\Oracle.DataAccess.dll" | select -First 1
 ~~~
 
-####Oracle 11gR2
+#### Oracle 11gR2 ####
+
+- Oracle 11gR2 is the default configuration.
 
 ~~~
 Import-Module Oracle.DataAccess -Prefix Oms
 ~~~
 
-Locates assembly
-~~~
+- Locates assembly
+
+~~~powershell
 $OraDataAss = Resolve-Path -path "C:\oracle\11g_32\product\11.2.*\client_1\odp.net\bin\4\Oracle.DataAccess.dll"  | select -First 1
 ~~~
 
-<a name="connect"></a>
-### Connect[&uarr;](#TOC) ###
+[&uarr;](#TOC)
+
+### Connect ###
 
 **SYNOPSIS**
 
@@ -83,18 +87,15 @@ Using the Oracle Wallet to store password
 
 	Connect "User Id=/`;Data Source=pond.world"
 
-** NOTES **
+*** NOTES ***
 
 If -PassThru isn't used, the connection will be available for later operations such as Disconnect, without having to pass it
 
+[&uarr;](#TOC)
 
+### Example Query ###
 
-
-**Example Query**
-
-
-~~~
-
+~~~powershell
 $sqlEfcQuery =@'
 BEGIN
 dbms_output.enable;
@@ -139,15 +140,12 @@ EXCEPTION
 end;
 '@
 
-	#Assume calling script will import module
-	#Import-Module Oracle.DataAccess -Prefix Oms
-	$connStr = "User Id=/`;Data Source={0}" -f $DataSource
-
-	$Oraconn = OmsConnect -PassThru  -ConnectionString $connStr
-
-	$dt2 = Get-OmsDataTable -conn $Oraconn  -sql "select * from global_name"
-
-	write-host($dt2 | format-table | out-string);
+    #Assume calling script will import module
+    #Import-Module Oracle.DataAccess -Prefix Oms
+    $connStr = "User Id=/`;Data Source={0}" -f $DataSource
+    $Oraconn = OmsConnect -PassThru  -ConnectionString $connStr
+    $dt2 = Get-OmsDataTable -conn $Oraconn  -sql "select * from global_name"
+    write-host($dt2 | format-table | out-string);
 
     $paramValues = @(
        (New-OmsOraCmdParam -name "lv_nmi"                 -type ([Oracle.DataAccess.Client.OracleDbType]::Varchar2)  -direction ([System.Data.ParameterDirection]::Input)  -size 20 -value $nmi_item.nmi)
@@ -183,7 +181,7 @@ end;
               #FAILURE
               $InvalidNmiCSV += new-object PSObject -property @{ "nmi" =   $nmi_item.nmi}
           }
-	 }
+     }
 
 
 ~~~

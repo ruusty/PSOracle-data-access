@@ -13,9 +13,11 @@
     <tags>posh oracle-data-access admin</tags>
   </metadata>
   <files>
-    <file target="tools" src="tools/properties.ps1" />
+    <file target="tools" src="tools/ChocolateyBeforeModify.ps1" />
     <file target="tools" src="tools/chocolateyInstall.ps1" />
     <file target="tools" src="tools/chocolateyUninstall.ps1" />
     <file target="tools" src="tools/helpers.ps1" />
+    <file target="tools" src="tools/properties.ps1" />
+    <file target="tools" src="Dist/PSoracle-data-access.zip" />
   </files>
 </package>
