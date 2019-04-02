@@ -1,0 +1,22 @@
+<#
+Generated from properties.ps1.txt
+#>
+$sdlc_env="@SDLC_ENV@"
+$bitWidth = 32
+if (Get-ProcessorBits 64) {
+  $bitWidth = 64
+}
+Write-Debug "CPU is $bitWidth bit"
+
+# prepare install dir
+$installRootDirPath    = "$env:ProgramFiles\Ched Services\posh"
+$installModulesDirPath = "$installRootDirPath\Modules"
+$installDirPath        = "$installModulesDirPath\Oracle.DataAccess"
+
+#Deliverables in $GisOmsDelivery E.G. \\COVMWNECODP1\Delivery\GisOms\PSOracle-data-access\1.0.0.0
+$GisOmsDelivery = '\\COVMWNECODP1\Delivery\GisOms'
+$DeliverablesDir = join-path -Path $GisOmsDelivery  -ChildPath "PSOracle-data-access"
+$DeliverablesDir = join-path -Path $DeliverablesDir -ChildPath $env:chocolateyPackageVersion
+write-host "`$DeliverablesDir=$DeliverablesDir"
+$ZipName ="PSOracle-data-access.zip"
+

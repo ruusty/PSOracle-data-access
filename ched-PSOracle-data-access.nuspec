@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>ched-PSOracle-data-access</id>
+    <version>0.0.0</version>
+    <title>ched-PSoracle-data-access</title>
+    <authors>Spatial Systems</authors>
+    <owners>Spatial Systems</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Execute Pl/Sql from Powershell</summary>
+    <description>Oracle Access from Powershell</description>
+    <copyright>Russell</copyright>
+    <tags>posh oracle-data-access admin</tags>
+  </metadata>
+  <files>
+    <file target="tools" src="tools/properties.ps1" />
+    <file target="tools" src="tools/chocolateyInstall.ps1" />
+    <file target="tools" src="tools/chocolateyUninstall.ps1" />
+    <file target="tools" src="tools/helpers.ps1" />
+  </files>
+</package>
